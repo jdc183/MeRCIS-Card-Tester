@@ -15,6 +15,7 @@ void setup() {
   pinMode(13,OUTPUT);
   pinMode(ADC_PIN,OUTPUT);
   pinMode(DAC_PIN,OUTPUT);
+  pinMode(LDAC_PIN,OUTPUT);
   pinMode(H_EN,OUTPUT);
   pinMode(H_POS,OUTPUT);
   pinMode(H_NEG,OUTPUT);
@@ -25,6 +26,7 @@ void setup() {
   
   digitalWrite(H_POS,HIGH);
   digitalWrite(H_NEG,LOW);
+  digitalWrite(LDAC_PIN,LOW);
 }
 
 void loop() {
@@ -35,11 +37,12 @@ void loop() {
 
   rx = Serial.readStringUntil('\n');//get recieved data
   received = rx.toFloat();  //convert it to a float
-  if(received > 0.001){
-    digitalWrite(H_EN,HIGH);
+  
+  if(received > 0.001){ //If its not zero
+    digitalWrite(H_EN,HIGH);//Close the hbridge
   }
-  else{
-    digitalWrite(H_EN,LOW);
+  else{//otherwise
+    digitalWrite(H_EN,LOW);//Open the hbridge
   }
   out = received / 3.3 * 4095.0; //16bit int to write to dac
   DAC_write(out);  //Write this to the DAC
@@ -59,7 +62,7 @@ uint16_t ADC_read() {
     digitalWrite(ADC_PIN, LOW);
     uint16_t ret1(SPI.transfer16(0x0000)); 
     digitalWrite(ADC_PIN, HIGH);
-    return ret1;
+    return ret1 & 0b0000111111111111;
 }
 
 /*  write a 12-bit value to the MCP4921 DAC  */
@@ -70,10 +73,12 @@ void DAC_write(uint16_t to_dac) {
     dataMSB &= 0b00001111;
     dataMSB = dataMSB | DAC_SELECT | INPUT_BUF | GAIN_SELECT | PWR_DOWN;
     
+    noInterrupts();
     digitalWrite(DAC_PIN, LOW);
     SPI.transfer(dataMSB);
     SPI.transfer(dataLSB);
     digitalWrite(DAC_PIN, HIGH);
+    interrupts();
 }
 
 /* initialize the SPI bus */
