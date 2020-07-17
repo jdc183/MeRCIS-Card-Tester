@@ -5,6 +5,7 @@
 
 #define ADC_PIN 8
 #define DAC_PIN 9
+#define LDAC_PIN A0
 
 #define H_EN 4
 #define H_POS 3
