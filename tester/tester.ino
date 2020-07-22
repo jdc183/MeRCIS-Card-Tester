@@ -7,7 +7,7 @@ uint16_t out;
 uint16_t sense;
 float tx;
 String rx;
-SPISettings DAC_SETTINGS = SPISettings(1000000, MSBFIRST, SPI_MODE1);
+SPISettings DAC_SETTINGS = SPISettings(1000000, MSBFIRST, SPI_MODE0);
 SPISettings ADC_SETTINGS = SPISettings(125000, MSBFIRST, SPI_MODE0);
 
 void setup() {
