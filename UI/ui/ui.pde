@@ -149,6 +149,9 @@ void draw() {
 void doSerial(){
   if(go){
     try{
+    
+    if(dacVolts >= 3.3) {dacVolts=3.3; dir = -abs(stepVoltage);}
+    if(dacVolts <= 0.0) {dacVolts=0.0; dir =  abs(stepVoltage);}
     testerPort.clear();  //Empty the buffer just in case it collects some miscellaneous garbage for no reason
     testerPort.write(nf(dacVolts,1,3)+"\n\r");  //Print the desired voltage as a float to the serial port.  I should really convert this to a 12bit value
     
@@ -168,8 +171,6 @@ void doSerial(){
     try{
     adcVolts = float(in);
     
-    if(dacVolts >= 3.3) {dacVolts=3.3; dir = -abs(stepVoltage);}
-    if(dacVolts <= 0.0) {dacVolts=0.0; dir =  abs(stepVoltage);}
     scope.addPoint(dacVolts,adcVolts/rSense*1000.0);///rsense*1000.0);
     dacVolts += dir;
     }
