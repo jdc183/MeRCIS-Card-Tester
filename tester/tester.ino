@@ -37,7 +37,7 @@ void loop() {
   while (Serial.available()<2);//Wait for incoming serial data
 //  digitalWrite(13,HIGH);//turn on led
 
-  rx = Serial.readStringUntil('\n');//get recieved data
+  rx = Serial.readStringUntil('\n');//get received data
   received = rx.toFloat();  //convert it to a float
   
   if(received > 0.001){ //If its greater than zero
@@ -45,7 +45,7 @@ void loop() {
     digitalWrite(H_POS,HIGH);
     digitalWrite(H_NEG,LOW);
   }
-  else if(recieved < -0.001){//If its less than zero
+  else if(received < -0.001){//If its less than zero
     digitalWrite(H_EN,HIGH); //Reverse the hbridge
     digitalWrite(H_POS,LOW);
     digitalWrite(H_NEG,HIGH);
