@@ -48,6 +48,7 @@ void loop() {
   }
   out = received / 3.3 * 4095.0; //16bit int to write to dac
   DAC_write(out);  //Write this to the DAC
+  delay(1);
   sense = ADC_read();  //Read the value from the ADC
   tx = float(sense) / 4095.0 * 3.3;  //Map it to a float
 //  printBin(sense);
