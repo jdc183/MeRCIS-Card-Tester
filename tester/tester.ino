@@ -40,18 +40,28 @@ void loop() {
   rx = Serial.readStringUntil('\n');//get recieved data
   received = rx.toFloat();  //convert it to a float
   
-  if(received > 0.001){ //If its not zero
-    digitalWrite(H_EN,HIGH);//Close the hbridge
+  if(received > 0.001){ //If its greater than zero
+    digitalWrite(H_EN,HIGH);//Close the hbridge forward
+    digitalWrite(H_POS,HIGH);
+    digitalWrite(H_NEG,LOW);
+  }
+  else if(recieved < -0.001){//If its less than zero
+    digitalWrite(H_EN,HIGH); //Reverse the hbridge
+    digitalWrite(H_POS,LOW);
+    digitalWrite(H_NEG,HIGH);
   }
   else{//otherwise
     digitalWrite(H_EN,LOW);//Open the hbridge
+    
   }
-  out = received / 3.3 * 4095.0; //16bit int to write to dac
+  out = abs(received / 3.3 * 4095.0); //16bit int to write to dac
   DAC_write(out);  //Write this to the DAC
   delay(1);
   sense = ADC_read();  //Read the value from the ADC
-  tx = float(sense) / 4095.0 * 3.3;  //Map it to a float
+  tx = float(sense) / 5397 * 3.3;  //Map it to a float
 //  printBin(sense);
+//  Serial.print('\t');
+//  Serial.print(sense);
 //  Serial.print('\t');
   Serial.print(String(tx,4));  //Send it back to the computer
   Serial.print('\n');
@@ -64,8 +74,6 @@ void loop() {
 
 /*  read a 12-bit value from the MCP3201 ADC  */
 uint16_t ADC_read() {
-    //SPI.setBitOrder(LSBFIRST);
-    
     SPI.beginTransaction(ADC_SETTINGS);
     digitalWrite(ADC_PIN, LOW);
     uint16_t ret1(SPI.transfer16(0x0000)); 
@@ -81,9 +89,7 @@ void DAC_write(uint16_t to_dac) {
     
     dataMSB &= 0b00001111;
     dataMSB = dataMSB | DAC_SELECT | INPUT_BUF | GAIN_SELECT | PWR_DOWN;
-
     
-    //SPI.setBitOrder(MSBFIRST);
     SPI.beginTransaction(DAC_SETTINGS);
     noInterrupts();
     digitalWrite(DAC_PIN, LOW);
@@ -97,8 +103,7 @@ void DAC_write(uint16_t to_dac) {
 /* initialize the SPI bus */
 void SPI_init() {
   // trying new SPI.begin() call per Arduino Due documentation
-  SPI.begin();  // Auto into mode1
-//  SPI.setBitOrder(MSBFIRST);
+  SPI.begin();  // Auto into mode1?  I don't think this line is necessary
   
     DAC_write((uint16_t)0);
 }
@@ -113,5 +118,4 @@ void printBin(uint16_t c){
       Serial.print("0");
     }
   }
-//  Serial.println();
 }
