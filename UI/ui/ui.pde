@@ -3,9 +3,11 @@ import processing.serial.*;
 
 GUI frame1;  //GUI container object for all the elements
 Plot scope;  //Graph of the transfer characteristics
+Plot tran1, tran2; //Graphs of transient response
 Button playButton;  //button to advance test
 Button refreshButt; //Button to refresh the
 Button resetButton; //Clears the scope buffer and stops test
+Button getTransients;
 Dropdown portsDropdown;  //Dropdown to select COM port
 TextEntry rSenseEntry;  //
 TextEntry stepEntry;
@@ -22,12 +24,6 @@ float dir;
 float rSense;
 int bufferSize;
 boolean go;
-//color bg1;
-//color bg2;
-//color bg3;
-//color fg1;
-//color fg2;
-//color fg3;
 boolean mouseOverNothing;
 public int previousMouseX, previousMouseY;
 int timeOfLastClick;
@@ -36,7 +32,7 @@ PFont baseFont;
 public PApplet papple;
 
 void setup() {  //This method is called once at startup
-  size(800, 480);  //Nice resolution for small screens, could easily be changed
+  size(800, 800);  //Nice resolution for small screens, could easily be changed
   //String[] fontList = PFont.list();
   //printArray(fontList);
   
@@ -55,7 +51,8 @@ void setup() {  //This method is called once at startup
   frame1.add(playButton);
   
   //This is the plot of the amplifier transfer characteristics
-  scope = new Plot(frame1, 10,45,760,420,"Scope","Input Voltage (V)","Output Current (mA)");//,4.0,-0.1,4.0,-0.1);
+  scope = new Plot(frame1, 10,45,760,390,"Scope","Input Voltage (V)","Output Current (mA)");//,4.0,-0.1,4.0,-0.1);
+  //scope.showTitle(true);
   frame1.add(scope);
   
   resetButton = new Button(frame1, 90,10,50,26,"RST",new Runnable(){public void run(){reset();}});
@@ -86,6 +83,18 @@ void setup() {  //This method is called once at startup
   stepVoltage = 0.01;
   stepEntry.setValue(str(stepVoltage));
   stepEntry.setStep(0.01);
+  
+  getTransients = new Button(frame1, 10, 445, 70, 26, "\u21bb", new Runnable(){public void run(){getTransients();}});
+  frame1.add(getTransients);
+  
+  tran1 = new Plot(frame1, 10,480,380,300,"Forced Response","Time (us)","Output Current (mA)");//,4.0,-0.1,4.0,-0.1);
+  //tran1.showTitle(true);
+  tran1.showFit(false);
+  frame1.add(tran1);
+  tran2 = new Plot(frame1, 400,480,380,300,"Natural Response"," ","Output Current (mA)");//,4.0,-0.1,4.0,-0.1);
+  //tran2.showTitle(true);
+  tran2.showFit(false);
+  frame1.add(tran2);
   
   //Add the initially detected ports to the dropdown
   portList = Serial.list();
@@ -253,6 +262,25 @@ void reset(){
   dir = stepVoltage;
   //go = false;
   //playButton.setTitle("\u25ba");
+}
+
+void getTransients(){
+  try{
+  testerPort.write("r\n");
+  cursor(WAIT);
+  delay(2000);
+  String tranString = testerPort.readStringUntil('r');
+  float[] tranFloats = float(tranString.split("\n"));
+  tran1.clear();
+  tran2.clear();
+  for(int i = 0; i < tranFloats.length-1;i++){
+     if(i >= 500 && i<= 1000)tran1.addPoint((i-684)*52.6,tranFloats[i]);
+     else if(i >= 1300 && i <= 1800) tran2.addPoint((i-1366)*52.6,tranFloats[i]);
+  }
+  }catch(NullPointerException e){
+    
+  }
+  
 }
 
 //Called when new port is selected on dropdown
