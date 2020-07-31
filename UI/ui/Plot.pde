@@ -1,6 +1,6 @@
 import garciadelcastillo.dashedlines.*;
 class Plot extends Element{
-  boolean autoscale, showFit, dragging;
+  boolean autoscale, showFit, showTitle, dragging;
   float xmax, xmin, ymax, ymin, winymax, winymin, winxmax, winxmin;
   int yzero, xzero, padLeft, padBot;
   ArrayList<Float> xs,ys;
@@ -135,7 +135,7 @@ class Plot extends Element{
   void display(){
     noStroke();
     fill(frame.bgdark);
-    rect(x+padLeft,y,w-padLeft,h-padBot,5); // Draw black background
+    rect(x+padLeft,y,w-padLeft,h-padBot,5); // Draw slate background
     
     stroke(frame.bgfaded);
     if (winymax < 0.0) ;//line(x+padLeft,y,x+w,y);          // Draw the x-axis at the top
@@ -191,6 +191,11 @@ class Plot extends Element{
       stroke(frame.bgfaded);
       dash.line(x+padLeft,map(winxmin*slope+intercept,winymin,winymax,y+h-padBot,y),x+w,map(winxmax*slope+intercept,winymin,winymax,y+h-padBot,y));
     }
+    if (showTitle){
+      fill(frame.fglight);
+      textAlign(CENTER,TOP);
+      text(title,x+padLeft + (w-padLeft)/2,y+5);
+    }
   }
   
   //Add a point (x,y)
@@ -208,7 +213,12 @@ class Plot extends Element{
     ycoords.remove(0);
     update();
   }
-  
+  void showTitle(boolean showTitle){
+    this.showTitle = showTitle;
+  }
+  void showFit(boolean showFit){
+    this.showFit = showFit;
+  }
   void setAutoscale(boolean autoscale){
     this.autoscale = autoscale;
     update();
