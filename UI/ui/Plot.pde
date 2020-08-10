@@ -91,12 +91,12 @@ class Plot extends Element{
     
     if (autoscale){
       if(ymax > Float.MIN_VALUE && ymin < Float.MAX_VALUE){
-        winymax = ymax + (ymax-ymin)*.01;
-        winymin = ymin - (ymax-ymin)*.01;
+        winymax = ymax + (ymax-ymin)*.1;
+        winymin = ymin - (ymax-ymin)*.1;
       }
       if(xmax > Float.MIN_VALUE && xmin < Float.MAX_VALUE){
-        winxmax = xmax + (xmax-xmin)*.01;
-        winxmin = xmin - (xmax-xmin)*.01;
+        winxmax = xmax + (xmax-xmin)*.1;
+        winxmin = xmin - (xmax-xmin)*.1;
       }
     }
     
@@ -162,17 +162,35 @@ class Plot extends Element{
     textAlign(CENTER,BOTTOM);
     translate(x,y+h-padBot);
     rotate(-PI/2);
-    text(ylabel,0,0,h,padLeft-5);
+    text(ylabel,0-10,0,h,padLeft-5);
     rotate(PI/2);
     translate(-(x),-(y+h-padBot));
     
     
     //Draw points
     stroke(frame.fglight);
+    noFill();
+    beginShape();
     for (int i = 1; i<xcoords.size(); i++){
-      if(true)//xs.get(i)<winxmax && xs.get(i)>winxmin && ys.get(i)<winymax && ys.get(i)>winymin)
-        line (xcoords.get(i-1),ycoords.get(i-1),xcoords.get(i),ycoords.get(i));
+      //int newX, newY;
+      if(xs.get(i)<winxmax && xs.get(i)>winxmin && ys.get(i)<winymax && ys.get(i)>winymin){
+        //line (xcoords.get(i-1),ycoords.get(i-1),xcoords.get(i),ycoords.get(i));
+        vertex(xcoords.get(i),ycoords.get(i));
+      }
+      else{
+        endShape();
+        beginShape();
+      }
+      //else{
+      //  if (xs.get(i)>winxmax){
+      //    newX = x+w;
+      //    newY = ycoords.get
+      //  }
+      //  else if (x
+        
+      //}
     }
+    endShape();
     if (mouseOver()){
       cursor(CROSS);
       fill(frame.fglight);
@@ -223,6 +241,15 @@ class Plot extends Element{
     this.autoscale = autoscale;
     update();
   }
+  
+  void setWindow(float x1,float y1,float x2,float y2){
+    autoscale = false;
+    winxmin = x1;
+    winxmax = x2;
+    winymin = y1;
+    winymax = y2;
+  }
+  
   
   void setWindowFromCoords(int x1, int y1, int x2, int y2){
     autoscale=false;
