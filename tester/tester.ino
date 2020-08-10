@@ -9,6 +9,7 @@ float tx;
 String rx;
 byte arr[3072];
 uint16_t a, b;
+int n;
 #define ADC_SETTINGS  SPISettings(2000000, MSBFIRST, SPI_MODE0)
 
 void setup() {
@@ -40,6 +41,9 @@ void loop() {
 
   rx = Serial.readStringUntil('\n');//get recieved data
   if (rx.indexOf("r") >= 0){
+    digitalWrite(H_POS,HIGH);
+    digitalWrite(H_NEG,LOW);
+    digitalWrite(LDAC_PIN,LOW);
     for(int i = 0; i/3 < 1024; i+=3){
       if(i/3<683 && i/3>341){
         a = DADC_RW(4095);
@@ -53,12 +57,17 @@ void loop() {
       arr[i+1] = a<<4 | b>>8;
       arr[i+2] = b;
     }
-
+    n = 0;
     for (int i = 0; i/3 < 1024; i+=3){
       a = (uint16_t)arr[i] <<4 | arr[i+1] >>4;
       b = ((uint16_t) arr[i+1] & 0x000F) <<8 | arr[i+2];
-      
+      Serial.print(n);
+      Serial.print(",");
+      n++;
       Serial.println(String(float(a) / 5397 * 2 * 3.3,4));
+      Serial.print(n);
+      Serial.print(",");
+      n++;
       Serial.println(String(float(b) / 5397 * 2 * 3.3,4));
     }
     Serial.println('r');
@@ -82,6 +91,7 @@ void loop() {
     }
     out = abs(received / 3.3 * 4095.0); //16bit int to write to dac
     //DAC_write(out);  //Write this to the DAC
+    DADC_RW(out);
     delay(1);
     //sense = ADC_read();  //Read the value from the ADC
     sense = DADC_RW(out);
